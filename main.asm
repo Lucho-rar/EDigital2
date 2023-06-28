@@ -48,101 +48,35 @@ AUXILIO	    EQU	    0x34
 	ORG	0x04
 	GOTO	INTERRUPCION
 	
-INICIO
-	BANKSEL	ANSEL
-;mod canales analogicos/digitales
-	MOVLW	b'01100000'
-	MOVWF	ANSEL		;RE0 y RE1 entrada analogica
-	CLRF	ANSELH		;resto digital
-
-;mod para baudio 9600
-	BSF	BAUDCTL,3	;BCRG16=1 para baudio 9600
-	;MOVLW	b'00000111'
-	;MOVWF	OPTION_REG	;hab gral pull-up, prescaler 256
+TABLA_HEXA_H
+	    ADDWF   PCL,1
+	    RETLW    00H
+	    RETLW    01H
+	    RETLW    02H
+	    RETLW    03H
+	    RETLW    04H
+	    RETLW    05H
+	    RETLW    06H
+	    RETLW    07H
+	    RETLW    08H
+	    RETLW    09H
+	    RETLW    10H
+	    RETLW    11H
+	    RETLW    12H
+	    RETLW    13H
+	    RETLW    14H
+	    RETLW    15H
+	    RETLW    16H
+	    RETLW    17H
+	    RETLW    18H
+	    RETLW    19H
+	    RETLW    20H		
+	    RETLW    21H
+	    RETLW    22H
+	    RETLW    23H
+	    RETLW    24H
+	    RETLW    25H
 	
-;mod entradas/salidas	
-	BANKSEL	TRISA
-	CLRF	TRISA		;PORTA salida
-	MOVLW	b'00000011'
-	MOVWF	TRISB		;RB0 y RB1 entrada, resto salida
-	CLRF	TRISC		;PORTC	salida
-	;BSF	TRISC,7		;RC7 entrada
-	CLRF	TRISD		;PORTD salida
-	CLRF	TRISE		    
-	BSF	TRISE,0		;RE0 entrada
-	BSF	TRISE,1		;RE1 entrada	
-	
-;prescaler 256, res pull up	
-	MOVLW	b'00000011'
-	MOVWF	WPUB		;res pull up para RB0 y RB1
-	MOVWF	IOCB
-	BCF	IOCB,0		;int por cambio de estado RB1
-	
-;asincrono, low speed, 9600 baudio, habilitacion interrupcion por recepcion
-	BCF	TXSTA,4		;SYNC=0 para asincrono
-	BSF	TXSTA,2		;BRGH=1 para low speed
-	MOVLW	.25
-	MOVWF	SPBRG		;para baudio 9600
-	CLRF	PIE1
-	BSF	PIE1,RCIE	;habilitamos interrupcion por recepcion
-	
-;voltaje de referecian y justificacion ADC
-	CLRF	ADCON1		;voltaje de ref 5V y masa
-	BSF	ADCON1,7	;justificacion derecha
-
-;8 bits recepcion, habilitacion de recepcion
-	BANKSEL	PORTA
-	BSF	RCSTA,4	    ;CREN=1 para habilitar el receptor
-	BCF	RCSTA,6	    ;RX9=0 para receibir 8 bits
-	BSF	RCSTA,7	    ;SPEN=1 para habilitar recepcion	
-	
-;setear variables
-	CLRF	NUM_REC
-	
-	MOVLW	.9
-	MOVWF	DECENA_MAX
-	MOVWF	UNIDAD_MAX
-	CLRF	DECENA_MIN
-	CLRF	UNIDAD_MIN
-	
-	CLRF	SEL_SENSOR
-	CLRF	SEL_MIN_MAX
-	CLRF	SEL_UN_DEC
-      
-	MOVLW	.5
-	MOVWF	DECENA_COMP
-	MOVWF	UNIDAD_COMP
-	
-	CLRF	UNIDAD
-	CLRF	DECENA
-	
-	MOVLW	.100
-	MOVWF	MULT_TMR0 
-	MOVLW	.61
-	MOVWF	TMR0
-	MOVLW	.10
-	MOVWF	AUX_TIEMPO 
-	MOVLW	.250
-	MOVWF	AUX_DISP
-	CLRF	PORTA
-	BCF	PORTC,0
-	BCF	PORTC,1
-	BCF	PORTC,2
-	;eleccion de entrada analogica al ADC, oscilador, y ADC on
-	MOVLW	b'11010101'
-	MOVWF	ADCON0
-	BANKSEL	OPTION_REG
-	MOVLW	b'00000111'
-	MOVWF	OPTION_REG	;hab gral pull-up, prescaler 256
-	CALL	DELAY_ADC
-	
-;comienza conversion y habilitacion general interrupciones
-	BANKSEL	PORTA
-	BSF	ADCON0,1	    ;inicia la conversion
-	MOVLW	b'11011000'	    ;hab gral int, RB0, RB1 y perifericos
-	MOVWF   INTCON
-	GOTO	PRINCIPAL
-;TABLAS
 TABLA_HEXA
 	    ADDWF   PCL,1
 	    RETLW    00H
@@ -245,6 +179,104 @@ TABLA_HEXA
 	    RETLW    97H
 	    RETLW    98H
 	    RETLW    99H
+	
+INICIO
+	BANKSEL	ANSEL
+;mod canales analogicos/digitales
+	MOVLW	b'01100000'
+	MOVWF	ANSEL		;RE0 y RE1 entrada analogica
+	CLRF	ANSELH		;resto digital
+
+;mod para baudio 9600
+	BSF	BAUDCTL,3	;BCRG16=1 para baudio 9600
+	;MOVLW	b'00000111'
+	;MOVWF	OPTION_REG	;hab gral pull-up, prescaler 256
+	
+;mod entradas/salidas	
+	BANKSEL	TRISA
+	CLRF	TRISA		;PORTA salida
+	MOVLW	b'00000011'
+	MOVWF	TRISB		;RB0 y RB1 entrada, resto salida
+	CLRF	TRISC		;PORTC	salida
+	;BSF	TRISC,7		;RC7 entrada
+	CLRF	TRISD		;PORTD salida
+	CLRF	TRISE		    
+	BSF	TRISE,0		;RE0 entrada
+	BSF	TRISE,1		;RE1 entrada	
+	
+;prescaler 256, res pull up	
+	;res pull up para RB0 y RB1
+	BANKSEL	IOCB
+	CLRF	IOCB
+	BSF	IOCB,7		;int por cambio de estado RB1
+	
+;asincrono, low speed, 9600 baudio, habilitacion interrupcion por recepcion
+	BCF	TXSTA,4		;SYNC=0 para asincrono
+	BSF	TXSTA,2		;BRGH=1 para low speed
+	MOVLW	.25
+	MOVWF	SPBRG		;para baudio 9600
+	CLRF	PIE1
+	BSF	PIE1,RCIE	;habilitamos interrupcion por recepcion
+	
+;voltaje de referecian y justificacion ADC
+	CLRF	ADCON1		;voltaje de ref 5V y masa
+	BSF	ADCON1,7	;justificacion derecha
+
+;8 bits recepcion, habilitacion de recepcion
+	BANKSEL	PORTA
+	BSF	RCSTA,4	    ;CREN=1 para habilitar el receptor
+	BCF	RCSTA,6	    ;RX9=0 para receibir 8 bits
+	BSF	RCSTA,7	    ;SPEN=1 para habilitar recepcion	
+	
+;setear variables
+	CLRF	NUM_REC
+	
+	MOVLW	.8
+	MOVWF	DECENA_MAX
+	MOVWF	UNIDAD_MAX
+	MOVLW	.1
+	MOVWF	DECENA_MIN
+	MOVWF	UNIDAD_MIN
+	
+	CLRF	SEL_SENSOR
+	CLRF	SEL_MIN_MAX
+	CLRF	SEL_UN_DEC
+      
+	MOVLW	.1
+	MOVWF	DECENA_COMP
+	MOVWF	UNIDAD_COMP
+	
+	CLRF	UNIDAD
+	CLRF	DECENA
+	
+	MOVLW	.100
+	MOVWF	MULT_TMR0 
+	MOVLW	.61
+	MOVWF	TMR0
+	MOVLW	.10
+	MOVWF	AUX_TIEMPO 
+	MOVLW	.250
+	MOVWF	AUX_DISP
+	CLRF	PORTA
+	BCF	PORTC,0
+	BCF	PORTC,1
+	BCF	PORTC,2
+	;eleccion de entrada analogica al ADC, oscilador, y ADC on
+	MOVLW	b'01010101'
+	MOVWF	ADCON0
+	BANKSEL	OPTION_REG
+	MOVLW	b'10000111'
+	MOVWF	OPTION_REG	;hab gral pull-up, prescaler 256
+	CALL	DELAY_ADC
+	
+;comienza conversion y habilitacion general interrupciones
+	BANKSEL	PORTA
+	BSF	ADCON0,1	    ;inicia la conversion
+	MOVLW	b'11010000'	    ;hab gral int, RB0, RB1 y perifericos
+	MOVWF   INTCON
+	GOTO	PRINCIPAL
+;TABLAS
+
 	    
 TABLA_DISPLAY
 	    ADDWF   PCL,1	    ;sumo w con el pcl
@@ -263,13 +295,12 @@ PRINCIPAL
 	CALL    HUM_TEMP	    ;led que indica que se esta sensando
 	CALL    MAX_MIN	    ;led que indica si se ingresa max o min
 	CALL    DEC_UN	    ;led que indica si se ingresa dec o un
-	CALL	SUB_RECEPCION
+	;CALL	SUB_RECEPCION
 	CALL    INT_ADC
 	CALL	DISPLAY
-	CALL	PRUEBA
+	;CALL	PRUEBA
         CALL    VER_DEC_UN	    ;verificamos los valores optimos
-	BTFSS   ADCON0,GO
-	
+	;BTFSS   ADCON0,GO	    ;lo borramos por cansancio
 	GOTO    PRINCIPAL
 
 ;subrutinas de programa principal
@@ -479,15 +510,16 @@ PRUEBA
 	    RETURN
 	     
 INT_ADC
-	    BTFSS   SEL_SENSOR,1
+	    BTFSS   SEL_SENSOR,0
 	    GOTO    ADC_TEMP	
 	    GOTO    ADC_HUM
 	    
 ADC_TEMP
-	    BANKSEL ADRESL
-	    RRF	    ADRESL,1
-	    BCF	    ADRESL,7
-	    MOVF    ADRESL,W
+	    ;BANKSEL ADRESL
+	    ;RRF	    ADRESL,1
+	    ;BCF	    ADRESL,7
+	    ;MOVF    ADRESL,W
+	    MOVLW   .5
 	    CALL    TABLA_HEXA
 	    BANKSEL PORTA
 	    MOVWF   DECENA
@@ -508,8 +540,20 @@ ADC_TEMP
 	    RETURN
 	    
 ADC_HUM
-	    BANKSEL ADRESL
-	    COMF    ADRESL,W
+	    ;BANKSEL ADRESL
+	    ;RRF	    ADRESL,1
+	    ;BCF	    ADRESL,7
+	    ;RRF	    ADRESL,1
+	    ;BCF	    ADRESL,7
+	    ;RRF	    ADRESL,1
+	    ;BCF	    ADRESL,7
+	    
+	   ; MOVLW   .40
+	    ;SUBWF   ADRESL,1
+	    ;COMF    ADRESL,1
+	    ;MOVF    ADRESL,W
+	    
+	    MOVLW   .50
 	    CALL    TABLA_HEXA
 	    BANKSEL PORTA
 	    MOVWF   DECENA
@@ -576,6 +620,8 @@ INT_RB0
 INT_RB1
 	    INCF    SEL_MIN_MAX,1
 	    GOTO    FIN
+	    
+
 
 Retardo_400ms 
     CALL    Retardo_20ms
