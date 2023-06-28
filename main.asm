@@ -40,7 +40,7 @@ AUX_TIEMPO  EQU	    0x30
 CUENTA	    EQU	    0x31
 CUENTA_2    EQU	    0x32
 CONTADOR    EQU	    0x33
-  
+AUXILIO	    EQU	    0x34
   
 ;vectores de inicio e interrupcion
 	ORG	0x00	
@@ -264,10 +264,12 @@ PRINCIPAL
 	CALL    MAX_MIN	    ;led que indica si se ingresa max o min
 	CALL    DEC_UN	    ;led que indica si se ingresa dec o un
 	CALL	SUB_RECEPCION
+	CALL    INT_ADC
 	CALL	DISPLAY
+	CALL	PRUEBA
         CALL    VER_DEC_UN	    ;verificamos los valores optimos
 	BTFSS   ADCON0,GO
-	CALL    INT_ADC
+	
 	GOTO    PRINCIPAL
 
 ;subrutinas de programa principal
@@ -310,16 +312,18 @@ DISPLAY
 	    CALL    TABLA_DISPLAY
 	    MOVWF   UNIDAD
 	    BCF	    PORTA,0
-	    BSF	    PORTA,1
-	    MOVF    DECENA,W
+	     MOVF    DECENA,W
 	    MOVWF   PORTD
+	    BSF	    PORTA,1
+	   
 	    ;DECFSZ  AUX_DISP,1
 	    ;GOTO    $-1
 	    CALL    Retardo_20ms
 	    BCF	    PORTA,1
-	    BSF	    PORTA,0
 	    MOVF    UNIDAD,W
 	    MOVWF   PORTD
+	    BSF	    PORTA,0
+	    
 	    ;DECFSZ  AUX_DISP,1
 	    ;GOTO    $-1
 	    CALL    Retardo_20ms
@@ -406,6 +410,22 @@ VER_DEC_UN
 	    BTFSS   SEL_SENSOR,0    ;si es par on temp y off hum
 	    GOTO    LUZ		    ;enciendo luz
 	    GOTO    AGUA
+	    
+	    
+
+PRUEBA
+	MOVLW   .61		
+	MOVWF   TMR0
+	BTFSS   INTCON,2
+	GOTO    $-1
+	MOVWF   TMR0
+	BCF	INTCON,2
+	DECFSZ  MULT_TMR0,1
+	GOTO	PRUEBA
+	MOVLW	.100
+	MOVWF	MULT_TMR0
+	RETURN
+	   
 	    
     LUZ
 	    BCF	    PORTA,0
@@ -676,5 +696,3 @@ Retardo_1us
     RETURN
 
     END
-
-
