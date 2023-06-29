@@ -64,36 +64,36 @@ TABLA_DISPLAY
 TABLA_HEXA_H
 	ADDWF	    PCL,1
 	RETLW	99H
-	RETLW	97H
-	RETLW	95H
-	RETLW	93H
-	RETLW	91H
-	RETLW	89H
-	RETLW	87H
-	RETLW	85H
-	RETLW	83H
-	RETLW	81H
-	RETLW	79H
-	RETLW	77H
-	RETLW	75H
-	RETLW	73H
-	RETLW	71H
-	RETLW	69H
-	RETLW	67H
-	RETLW	65H
-	RETLW	63H
-	RETLW	61H
-	RETLW	59H
-	RETLW	57H
-	RETLW	55H
-	RETLW	53H
-	RETLW	51H
-	RETLW	50H
-	RETLW	48H
-	RETLW	46H
-	RETLW	44H
-	RETLW	42H
-	RETLW	40H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	99H
+	RETLW	66H
+	RETLW	66H
+	RETLW	66H
+	RETLW	66H
+	RETLW	66H
 	RETLW	38H
 	RETLW	36H
 	RETLW	34H
@@ -114,7 +114,6 @@ TABLA_HEXA_H
 	RETLW	4H
 	RETLW	2H
 	RETLW	0H
-	
 TABLA_HEXA
 	    ADDWF   PCL,1
 	    RETLW    00H
@@ -258,7 +257,7 @@ INICIO
 	
 ;voltaje de referecian y justificacion ADC
 	CLRF	ADCON1		;voltaje de ref 5V y masa	;justificacion izquierda
-	;BSF	ADCON1,7
+	BSF	ADCON1,7
 ;8 bits recepcion, habilitacion de recepcion
 	BANKSEL	PORTA
 	BSF	RCSTA,4	    ;CREN=1 para habilitar el receptor
@@ -376,7 +375,7 @@ DISPLAY
 	   
 	    ;DECFSZ  AUX_DISP,1
 	    ;GOTO    $-1
-	    CALL    Retardo_20ms						
+	    CALL    Retardo_1ms						
 	    BCF	    PORTA,1
 	    MOVF    UNIDAD,W
 	    MOVWF   PORTD
@@ -384,7 +383,7 @@ DISPLAY
 	    
 	    ;DECFSZ  AUX_DISP,1
 	    ;GOTO    $-1
-	    CALL    Retardo_20ms						
+	    CALL    Retardo_1ms						
 	    ;MOVLW   .250
 	    ;MOVWF   AUX_DISP
 	    RETURN
@@ -537,7 +536,7 @@ PRUEBA
 	    RETURN
 	     
 INT_ADC
-	    BTFSC   SEL_SENSOR,0
+	    BTFSS   SEL_SENSOR,0
 	    GOTO    ADC_TEMP	
 	    GOTO    ADC_HUM
 	    
@@ -547,8 +546,9 @@ ADC_TEMP
 	    BCF	    ADRESL,7
 	    RRF	    ADRESL,1
 	    BCF	    ADRESL,7
-	    ;MOVF    ADRESL,W
-	    MOVLW   .5
+	    MOVF    ADRESL,W
+	    
+	    ;MOVLW   .5
 	    CALL    TABLA_HEXA
 	    BANKSEL PORTA
 	    MOVWF   DECENA
@@ -583,7 +583,7 @@ ADC_HUM
 	    ;MOVF    ADRESL,W
 	    
 	    ;MOVLW   .50
-	    MOVLW   .10
+	    MOVLW   .15
 	    SUBWF   ADRESH,W
 	    
 	    BTFSC   STATUS,C
@@ -675,12 +675,33 @@ RECEPCION
 
 INT_RB0
 	    INCF    SEL_SENSOR,1
-	    GOTO    FIN
+	    BTFSS   SEL_SENSOR,0
+	    GOTO    SET_ADCON1_TEMP
+	    GOTO    SET_ADCON1_HUM
 INT_RB1
 	    INCF    SEL_MIN_MAX,1
 	    GOTO    FIN
 	    
-
+SET_ADCON1_TEMP
+	    BANKSEL ADCON1
+	    CLRF    ADCON1
+	    BSF	    ADCON1,7
+	    BANKSEL ADCON0
+	    MOVLW   B'11010101'
+	    MOVWF   ADCON0
+	    CALL    DELAY_ADC
+	    BSF	    ADCON0,GO
+	    GOTO    FIN
+	    
+SET_ADCON1_HUM
+	    BANKSEL ADCON1
+	    CLRF    ADCON1
+	    BANKSEL ADCON0
+	    MOVLW   B'11011001'
+	    MOVWF   ADCON0
+	    CALL    DELAY_ADC
+	    BSF	    ADCON0,GO
+	    GOTO FIN
 
 Retardo_400ms 
     CALL    Retardo_20ms
