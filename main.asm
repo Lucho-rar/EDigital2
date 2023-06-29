@@ -273,6 +273,12 @@ INICIO
 	CLRF	DECENA_MIN
 	CLRF	UNIDAD_MIN
 	
+	;MOVLW	.2
+	;MOVWF	DECENA_MIN
+	;MOVLW	.5
+	;MOVWF	UNIDAD_MIN
+	
+	
 	CLRF	SEL_SENSOR
 	CLRF	SEL_MIN_MAX
 	CLRF	SEL_UN_DEC
@@ -433,13 +439,13 @@ VER_DEC_UN
 	    SUBWF   DECENA_MAX,W    ;DECENA_MAX-DECENA_COMP
 	    BTFSC   STATUS,Z	    ;MAX=COMP?
 	    GOTO    VER_UN_MAYOR    ;SI entc comparamos unidad 
-	    BTFSC   STATUS,C	    ;MAX¿?COMP?
+	    BTFSC   STATUS,C	    ;MAX??COMP?
 	    GOTO    VER_DEC_MENOR   ;MAX>COMP, verifico valor minimo
 	    GOTO    ACT_MAYOR	    ;MAX<COMP, activo VENTILADOR    (TODO OK)
     VER_UN_MAYOR
 	    MOVF    UNIDAD_COMP,W
 	    SUBWF   UNIDAD_MAX,W    ;UNIDAD_MAX-UNIDAD_COMP
-	    BTFSC   STATUS,C	    ;MAX¿?COMP
+	    BTFSC   STATUS,C	    ;MAX??COMP
 	    GOTO    VER_DEC_MENOR   ;MAX>=COMP, verifico valor minimo
 	    GOTO    ACT_MAYOR	    ;MAX<COMP, activo VENTILADOR   (TODO OK)
 	    
@@ -448,13 +454,13 @@ VER_DEC_UN
 	    SUBWF   DECENA_COMP,W   ;DECENA_COMP-DECENA_MIN
 	    BTFSC   STATUS,Z	    ;COMP=MIN?
 	    GOTO    VER_UN_MENOR    ;IGUAL, comparamos unidad   
-	    BTFSC   STATUS,C	    ;COMP¿?MIN
+	    BTFSC   STATUS,C	    ;COMP??MIN
 	    RETURN		    ;COMP>MIN, volvemos a rut principal
 	    GOTO    ACT_MENOR	    ;COMP<MIN, activo BOMBA/LUZ 	    
     VER_UN_MENOR
 	    MOVF    UNIDAD_MIN,W	
 	    SUBWF   UNIDAD_COMP,W   ;UNIDAD_COMP-UNIDAD_MIN
-	    BTFSS   STATUS,C	    ;COMP¿?MIN
+	    BTFSS   STATUS,C	    ;COMP??MIN
 	    GOTO    ACT_MENOR	    ;COMP<MIN, activo BOMBA/LUZ
 	    RETURN		    ;COMP>=MIN, volvemos rutina principal	    
     
